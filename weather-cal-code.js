@@ -5,7 +5,7 @@
 /*
 
 This script contains the logic that allows Weather Cal to work. Please do not modify this file. You can add customizations in the widget script.
-Documentation is available at github.com/mzeryck/Weather-Cal
+Documentation is available at github.com/holmeswww/Weather-Cal
 
 */
 
@@ -17,7 +17,7 @@ const weatherCal = {
     this.fm = iCloudInUse ? FileManager.iCloud() : FileManager.local()
     this.bgPath = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-" + this.name)
     this.prefPath = this.fm.joinPath(this.fm.libraryDirectory(), "weather-cal-preferences-" + name)
-    this.widgetUrl = "https://raw.githubusercontent.com/mzeryck/Weather-Cal/main/weather-cal.js"
+    this.widgetUrl = "https://raw.githubusercontent.com/holmeswww/Weather-Cal/main/weather-cal.js"
     this.now = new Date()
     this.data = {}
     this.initialized = true
@@ -949,6 +949,7 @@ const weatherCal = {
     this.data.weather.currentDescription = weatherData ? (english ? weatherData.current.weather[0].main : weatherData.current.weather[0].description) : "--"
     this.data.weather.todayHigh = weatherData ? weatherData.daily[0].temp.max : null
     this.data.weather.todayLow = weatherData ? weatherData.daily[0].temp.min : null
+    this.data.weather.uvi = weatherData ? weatherData.current.uvi : null
 
     this.data.weather.forecast = []
     this.data.weather.hourly = []
@@ -1597,6 +1598,25 @@ const weatherCal = {
     this.provideText(batteryLevel + "%", batteryStack, this.format.battery)
   },
 
+  // Add a UV-index element to the widget.
+  async uvi(column) {
+    if (!this.data.weather) { await this.setupWeather(); }
+
+    const uviStack = this.align(column);
+    uviStack.setPadding(this.padding / 2, this.padding, this.padding / 2, this.padding);
+    uviStack.layoutHorizontally();
+    uviStack.centerAlignContent();
+
+    const uviSymbol = uviStack.addImage(SFSymbol.named("sun.max.fill").image);
+    uviSymbol.imageSize = new Size(20, 20);
+    this.tintIcon(uviSymbol, this.format.customText, true);
+
+    uviStack.addSpacer(this.padding * 0.6);
+    
+    const uviValue = this.displayNumber(this.data.weather.uvi, "--");
+    this.provideText("UV " + uviValue, uviStack, this.format.customText);
+  },
+
   // Display week number for current date.
   week(column) {
     const weekStack = this.align(column)
@@ -2037,118 +2057,118 @@ const weatherCal = {
       font: {
         name: "Text sizes, colors, and fonts",
         defaultText: {
-          val: { size: "14", color: "ffffff", dark: "", font: "regular", caps: "" },
+          val: { size: "12", color: "ffffff", dark: "", font: "regular", caps: "" },
           name: "Default font settings",
           description: "These settings apply to all text on the widget that doesn't have a customized value.",
           type: "fonts",
         },
         smallDate:   {
-          val: { size: "17", color: "", dark: "", font: "semibold", caps: "" },
+          val: { size: "13", color: "", dark: "", font: "semibold", caps: "" },
           name: "Small date",
           type: "fonts",
         },
         largeDate1:  {
-          val: { size: "30", color: "", dark: "", font: "light", caps: "" },
+          val: { size: "20", color: "", dark: "", font: "light", caps: "" },
           name: "Large date, line 1",
           type: "fonts",
         },
         largeDate2:  {
-          val: { size: "30", color: "", dark: "", font: "light", caps: "" },
+          val: { size: "20", color: "", dark: "", font: "light", caps: "" },
           name: "Large date, line 2",
           type: "fonts",
         },
         greeting:    {
-          val: { size: "30", color: "", dark: "", font: "semibold", caps: "" },
+          val: { size: "20", color: "", dark: "", font: "semibold", caps: "" },
           name: "Greeting",
           type: "fonts",
         },
         eventLabel:  {
-          val: { size: "14", color: "", dark: "", font: "semibold", caps: "" },
+          val: { size: "12", color: "", dark: "", font: "semibold", caps: "" },
           name: "Event heading (used for the TOMORROW label)",
           type: "fonts",
         },
         eventTitle:  {
-          val: { size: "14", color: "", dark: "", font: "semibold", caps: "" },
+          val: { size: "12", color: "", dark: "", font: "semibold", caps: "" },
           name: "Event title",
           type: "fonts",
         },
         eventLocation:   {
-          val: { size: "14", color: "", dark: "", font: "", caps: "" },
+          val: { size: "12", color: "", dark: "", font: "", caps: "" },
           name: "Event location",
           type: "fonts",
         },
         eventTime:   {
-          val: { size: "14", color: "ffffffcc", dark: "", font: "", caps: "" },
+          val: { size: "12", color: "ffffffcc", dark: "", font: "", caps: "" },
           name: "Event time",
           type: "fonts",
         },
         noEvents:    {
-          val: { size: "30", color: "", dark: "", font: "semibold", caps: "" },
+          val: { size: "20", color: "", dark: "", font: "semibold", caps: "" },
           name: "No events message",
           type: "fonts",
         },
         reminderTitle:  {
-          val: { size: "14", color: "", dark: "", font: "", caps: "" },
+          val: { size: "8", color: "", dark: "", font: "", caps: "" },
           name: "Reminder title",
           type: "fonts",
         },
         reminderTime:   {
-          val: { size: "14", color: "ffffffcc", dark: "", font: "", caps: "" },
+          val: { size: "8", color: "ffffffcc", dark: "", font: "", caps: "" },
           name: "Reminder time",
           type: "fonts",
         },
         noReminders:    {
-          val: { size: "30", color: "", dark: "", font: "semibold", caps: "" },
+          val: { size: "20", color: "", dark: "", font: "semibold", caps: "" },
           name: "No reminders message",
           type: "fonts",
         },
         newsTitle:  {
-          val: { size: "14", color: "", dark: "", font: "", caps: "" },
+          val: { size: "8", color: "", dark: "", font: "", caps: "" },
           name: "News item title",
           type: "fonts",
         },
         newsDate:   {
-          val: { size: "14", color: "ffffffcc", dark: "", font: "", caps: "" },
+          val: { size: "8", color: "ffffffcc", dark: "", font: "", caps: "" },
           name: "News item date",
           type: "fonts",
         },
         largeTemp:   {
-          val: { size: "34", color: "", dark: "", font: "light", caps: "" },
+          val: { size: "20", color: "", dark: "", font: "light", caps: "" },
           name: "Large temperature label",
           type: "fonts",
         },
         smallTemp:   {
-          val: { size: "14", color: "", dark: "", font: "", caps: "" },
+          val: { size: "12", color: "", dark: "", font: "", caps: "" },
           name: "Most text used in weather items",
           type: "fonts",
         },
         tinyTemp:    {
-          val: { size: "12", color: "", dark: "", font: "", caps: "" },
+          val: { size: "8", color: "", dark: "", font: "", caps: "" },
           name: "Small text used in weather items",
           type: "fonts",
         },
         customText:  {
-          val: { size: "14", color: "", dark: "", font: "", caps: "" },
+          val: { size: "10", color: "", dark: "", font: "", caps: "" },
           name: "User-defined text items",
           type: "fonts",
         },
         battery:     {
-          val: { size: "14", color: "", dark: "", font: "medium", caps: "" },
+          val: { size: "8", color: "", dark: "", font: "medium", caps: "" },
           name: "Battery percentage",
           type: "fonts",
         },
         sunrise:     {
-          val: { size: "14", color: "", dark: "", font: "medium", caps: "" },
+          val: { size: "10", color: "", dark: "", font: "medium", caps: "" },
           name: "Sunrise and sunset",
           type: "fonts",
         },
         covid:       {
-          val: { size: "14", color: "", dark: "", font: "medium", caps: "" },
+          val: { size: "10", color: "", dark: "", font: "medium", caps: "" },
           name: "COVID data",
           type: "fonts",
         },
         week:        {
-          val: { size: "14", color: "", dark: "", font: "light", caps: "" },
+          val: { size: "10", color: "", dark: "", font: "light", caps: "" },
           name: "Week label",
           type: "fonts",
         },
@@ -2257,22 +2277,22 @@ const weatherCal = {
       reminders: {
         name: "Reminders",
         numberOfReminders: {
-          val: "3",
+          val: "2",
           name: "Maximum number of reminders shown",
         }, 
         useRelativeDueDate: {
-          val: false,
+          val: true,
           name: "Use relative dates",
           description: "Set to true for a relative due date (in 3 hours) instead of absolute (3:00 PM).",
           type: "bool",
         },
         showWithoutDueDate: {
-          val: false,
+          val: true,
           name: "Show reminders without a due date",
           type: "bool",
         },
         showOverdue: {
-          val: false,
+          val: true,
           name: "Show overdue reminders",
           type: "bool",
         },
@@ -2519,7 +2539,7 @@ if (moduleName == Script.name()) {
       column
     `
     const name = "Weather Cal Widget Builder"
-    await weatherCal.runSetup(name, true, "Weather Cal code", "https://raw.githubusercontent.com/mzeryck/Weather-Cal/main/weather-cal-code.js")
+    await weatherCal.runSetup(name, true, "Weather Cal code", "https://raw.githubusercontent.com/holmeswww/Weather-Cal/main/weather-cal-code.js")
     const w = await weatherCal.createWidget(layout, name, true)
     w.presentLarge()
     Script.complete()

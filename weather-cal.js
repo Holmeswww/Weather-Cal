@@ -1,58 +1,120 @@
-// Variables used by Scriptable.
-// These must be at the very top of the file. Do not edit.
-// icon-color: deep-purple; icon-glyph: calendar;
 /*
 
 ~
 
-Welcome to Weather Cal. Run this script to set up your widget.
-
-Add or remove items from the widget in the layout section below.
-
-You can duplicate this script to create multiple widgets. Make sure to change the name of the script each time.
-
-Happy scripting!
+Welcome to Weather Cal. This widget is powered by Gemini AI
+to dynamically choose what to display in two columns.
 
 ~
 
 */
 
-// Specify the layout of the widget items.
-const layout = `
-  
-  row 
-    column
-      date
-      sunset
-      battery
-      space
-      events
+// --- Gemini Client Importer ---
+const geminiImporter = FileManager.local();
+const geminiCodeFilename = "GeminiAPI.js";
+const pathToGeminiCode = geminiImporter.joinPath(geminiImporter.documentsDirectory(), geminiCodeFilename);
+
+if (geminiImporter.isFileStoredIniCloud(pathToGeminiCode)) {
+  await geminiImporter.downloadFileFromiCloud(pathToGeminiCode);
+}
+const gemini = importModule(geminiCodeFilename);
+
+
+/**
+ * Fetches a dynamic layout from Gemini, with a 30-minute cache.
+ * @param {object} weatherCal - The imported Weather Cal module.
+ * @returns {Promise<{layout: string, message: string}>}
+ */
+async function getGeminiLayout(weatherCal) {
+  // Define cache path and check for a valid 30-minute cache
+  const cachePath = weatherCal.fm.joinPath(weatherCal.fm.libraryDirectory(), "weather-cal-gemini-cache-" + Script.name());
+  const cachedData = weatherCal.getCache(cachePath, 30);
+
+  if (cachedData && !cachedData.cacheExpired) {
+    console.log("Using cached Gemini layout.");
+    return cachedData;
+  }
+
+  console.log("Fetching new layout from Gemini.");
+
+  // Initialize settings and locale before using them
+  weatherCal.settings = await weatherCal.getSettings();
+  weatherCal.locale = weatherCal.settings.widget.locale;
+  if (!weatherCal.locale || weatherCal.locale === "" || weatherCal.locale === null) {
+    weatherCal.locale = Device.locale();
+  }
+
+  // Gather context for Gemini
+  await weatherCal.setupWeather();
+  await weatherCal.setupEvents();
+  await weatherCal.setupReminders();
+
+  const context = {
+    date: new Date().toString(),
+    weather: weatherCal.data.weather,
+    events: weatherCal.data.events.map(e => ({ title: e.title, startDate: e.startDate })),
+    reminders: weatherCal.data.reminders.map(r => ({ title: r.title, dueDate: r.dueDate })),
+  };
+
+  const systemPrompt = `
+    You are an intelligent assistant for a mobile widget. 
+    Based on the user's context (date, weather, events), choose up to 3 relevant widget items, **ordered by importance**, and provide a concise, friendly message.
+    Available items: 'date', 'greeting', 'events', 'reminders', 'current', 'future', 'forecast', 'sunrise', 'battery'.
+    Your response must be ONLY the raw JSON object, without any surrounding text, explanations, or markdown formatting like \`\`\`.
+    Example: {"layout": "events\\ngreeting\\ncurrent", "message": "Here's your afternoon update!"}
+  `;
+
+  const inputData = {
+    query: "Choose the best widget layout based on the context.",
+    context: JSON.stringify(context, null, 2),
+    systemPrompt: systemPrompt,
+  };
+
+  try {
+    const geminiResponse = await gemini.generate(inputData);
+
+    // Clean the response to extract only the JSON object
+    let cleanedResponse = geminiResponse;
+    const jsonStartIndex = cleanedResponse.indexOf('{');
+    const jsonEndIndex = cleanedResponse.lastIndexOf('}');
     
-    column(90)
-      current
-      future
-      space
-       
-`
+    if (jsonStartIndex !== -1 && jsonEndIndex !== -1) {
+      cleanedResponse = cleanedResponse.substring(jsonStartIndex, jsonEndIndex + 1);
+    }
+
+    const parsedResponse = JSON.parse(cleanedResponse);
+    
+    console.log("Gemini Parsed Response:");
+    console.log(JSON.stringify(parsedResponse, null, 2));
+    
+    weatherCal.fm.writeString(cachePath, JSON.stringify(parsedResponse));
+    return parsedResponse;
+  } catch (e) {
+    console.error("Gemini API/JSON Parse error: " + e.message);
+    return {
+      layout: "greeting\ndate\ncurrent",
+      message: "Here is your daily summary.",
+    };
+  }
+}
+
 
 /*
- * CODE
- * Be more careful editing this section. 
+ * Main Widget Code
  * =====================================
  */
 
 // Names of Weather Cal elements.
-const codeFilename = "weather-cal-code"
-const gitHubUrl = "https://raw.githubusercontent.com/mzeryck/Weather-Cal/main/weather-cal-code.js"
+const codeFilename = "Weather Cal code"
+const gitHubUrl = "https://raw.githubusercontent.com/holmeswww/Weather-Cal/main/weather-cal-code.js"
 
 // Determine if the user is using iCloud.
 let files = FileManager.local()
 const iCloudInUse = files.isFileStoredIniCloud(module.filename)
-
-// If so, use an iCloud file manager.
+// --- FIX: Correctly call the static FileManager.iCloud() method ---
 files = iCloudInUse ? FileManager.iCloud() : files
 
-// Determine if the Weather Cal code exists and download if needed.
+// Download Weather Cal code if needed.
 const pathToCode = files.joinPath(files.documentsDirectory(), codeFilename + ".js")
 if (!files.fileExists(pathToCode)) {
   const req = new Request(gitHubUrl)
@@ -63,22 +125,58 @@ if (!files.fileExists(pathToCode)) {
 // Import the code.
 if (iCloudInUse) { await files.downloadFileFromiCloud(pathToCode) }
 const code = importModule(codeFilename)
+code.initialize(Script.name(), iCloudInUse); // Initialize Weather Cal
 
-const custom = {
-
-  // Custom items and backgrounds can be added here.
-
-}
-
-// Run the initial setup or settings menu.
-let preview
+// Run setup if needed.
+let preview;
 if (config.runsInApp) {
   preview = await code.runSetup(Script.name(), iCloudInUse, codeFilename, gitHubUrl)
   if (!preview) return
 }
 
+// --- Get Dynamic Layout from Gemini ---
+const geminiData = await getGeminiLayout(code);
+
+// --- Construct a two-column layout from Gemini's response ---
+
+// 1. Split the layout items into an array
+const items = geminiData.layout.split('\n').filter(item => item.trim() !== '');
+
+// 2. Distribute items into left and right columns
+const leftItems = [];
+const rightItems = [];
+
+if (items.length > 0) {
+  // The first, most important item goes to the left column.
+  leftItems.push(items.shift()); 
+}
+// The rest of the items go to the right column.
+items.forEach(item => rightItems.push(item));
+
+// 3. Prepare the message and build the layout string
+const safeMessage = geminiData.message.replace(/"/g, '\\"');
+
+const leftColumnString = `
+    column
+      text("${safeMessage}")
+      space(5)
+      ${leftItems.join('\n      ')} 
+`;
+
+const rightColumnString = rightItems.length > 0 ? `
+    column
+      ${rightItems.join('\n      ')}
+` : '';
+
+// 4. Assemble the final layout
+const layout = `
+  row
+    ${leftColumnString}
+    ${rightColumnString}
+`;
+
 // Set up the widget.
-const widget = await code.createWidget(layout, Script.name(), iCloudInUse, custom)
+const widget = await code.createWidget(layout, Script.name(), iCloudInUse)
 Script.setWidget(widget)
 
 // If we're in app, display the preview.

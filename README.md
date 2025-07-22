@@ -1,6 +1,6 @@
 # Weather Cal
 
-<img src="https://github.com/mzeryck/Weather-Cal/blob/main/images/header.jpg" width="350" height="330" alt="Screenshot of a sample Weather Cal widget">
+<img src="https://github.com/holmeswww/Weather-Cal/blob/main/images/header.jpg" width="350" height="330" alt="Screenshot of a sample Weather Cal widget">
 
 This is a Scriptable widget that lets you display, position, and format multiple elements without writing any Javascript code. There are [many built-in widget items](#widget-items), including events, reminders, weather, battery, and much more. Weather Cal also fully supports [custom items](#custom-elements), and you can even [embed existing widgets](#embed-existing-widgets) into Weather Cal layouts.
 
@@ -20,17 +20,17 @@ This is a Scriptable widget that lets you display, position, and format multiple
 ## Setup
 Setting up Weather Cal is easy:
 
-1. Copy the code in [weather-cal.js](https://raw.githubusercontent.com/mzeryck/Weather-Cal/main/weather-cal.js). (You don't need to do anything with weather-cal-code.js.)
+1. Copy the code in [weather-cal.js](https://raw.githubusercontent.com/holmeswww/Weather-Cal/main/weather-cal.js). (You don't need to do anything with weather-cal-code.js.)
 
 2. Paste the code into a new Scriptable script. This is the widget script.
 
 3. Run the script. It will download the code script in the background and walk you through each step of the setup process.
 
-![Screenshots showing how to set up Weather Cal](https://github.com/mzeryck/Weather-Cal/blob/main/images/setup.jpg)
+![Screenshots showing how to set up Weather Cal](https://github.com/holmeswww/Weather-Cal/blob/main/images/setup.jpg)
 
 Once Weather Cal is set up, you can make multiple widgets by duplicating the widget script. You only need one copy of the Weather Cal code script.
 
-If you want a transparent or translucent widget, use [the Widget Blur script](https://github.com/mzeryck/Widget-Blur/). At the end of that script, select "Export to Photos", and then use the photo as your widget background.
+If you want a transparent or translucent widget, use [the Widget Blur script](https://github.com/holmeswww/Widget-Blur/). At the end of that script, select "Export to Photos", and then use the photo as your widget background.
 
 ## Settings
 Once you've set up Weather Cal, run the widget script again to access the settings menu, where you can:
@@ -91,7 +91,7 @@ You can change the layout of the widget using the following __layout items__:
 * Using `space` will add a space that automatically expands to fill the vertical space, pushing the items above and below it. You can make fixed-sized spaces using parentheses, like this: `space(50)`.
 
 ### ASCII
-If you want to [draw your widget using ASCII](https://twitter.com/mzeryck/status/1316614631868166144), delete all of the items and draw your widget like this:
+If you want to [draw your widget using ASCII](https://twitter.com/holmeswww/status/1316614631868166144), delete all of the items and draw your widget like this:
 ```
  -------------------
  |date    |   90   |
@@ -173,7 +173,7 @@ Documentation for Weather Cal's helper functions will be available in the wiki o
 ### Embed existing widgets
 Weather Cal supports embedding other Scriptable widgets. This allows you to position them alongisde Weather Cal elements to create more flexible layouts. For example, showing Weather Cal, [PurpleAir Air Quality](https://github.com/jasonsnell/PurpleAir-AQI-Scriptable-Widget), and [Random Scriptable API](https://scriptable.app/gallery/random-scriptable-api) would normally take three separate widgets. By embedding the widgets into Weather Cal, we can acheive this with a single large widget and only one "Scriptable" label:
 
-<img src="https://github.com/mzeryck/Weather-Cal/blob/main/images/custom.jpg" width="350" height="352" alt="Screenshot of a Weather Cal widget with multiple embedded widgets">
+<img src="https://github.com/holmeswww/Weather-Cal/blob/main/images/custom.jpg" width="350" height="352" alt="Screenshot of a Weather Cal widget with multiple embedded widgets">
 
 Here's how it works:
 - Before you start, [follow these directions](#custom-elements) to enable custom elements.
