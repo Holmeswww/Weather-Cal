@@ -46,6 +46,7 @@ async function getGeminiLayout(weatherCal) {
 
   // --- Gather rich context for Gemini ---
   await weatherCal.setupWeather(); // Includes location and sun data
+  await weatherCal.setupSunrise();
   await weatherCal.setupEvents();
   await weatherCal.setupReminders();
   await weatherCal.setupNews();
@@ -55,9 +56,18 @@ async function getGeminiLayout(weatherCal) {
     location: weatherCal.data.location,
     weather: weatherCal.data.weather,
     sun_times: weatherCal.data.sun,
-    events: weatherCal.data.events.map(e => ({ title: e.title, startDate: e.startDate, isAllDay: e.isAllDay })),
-    reminders: weatherCal.data.reminders.map(r => ({ title: r.title, dueDate: r.dueDate, isOverdue: r.isOverdue })),
-    battery: {
+    // FIX: Convert event dates to local time strings
+    events: weatherCal.data.events.map(e => ({ 
+      title: e.title, 
+      startDate: e.startDate.toString(), 
+      isAllDay: e.isAllDay 
+    })),
+    // FIX: Convert reminder dates to local time strings (if they exist)
+    reminders: weatherCal.data.reminders.map(r => ({ 
+      title: r.title, 
+      dueDate: r.dueDate ? r.dueDate.toString() : null, 
+      isOverdue: r.isOverdue 
+    })),    battery: {
         level: Device.batteryLevel(),
         isCharging: Device.isCharging()
     },
@@ -100,6 +110,10 @@ async function getGeminiLayout(weatherCal) {
     context: JSON.stringify(context, null, 2),
     systemPrompt: systemPrompt,
   };
+
+  // Log the context data for debugging
+  console.log("Gemini Context:");
+  console.log(JSON.stringify(context, null, 2));
 
   try {
     const geminiResponse = await gemini.generate(inputData);

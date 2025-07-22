@@ -2108,7 +2108,7 @@ const weatherCal = {
           type: "fonts",
         },
         reminderTitle:  {
-          val: { size: "8", color: "", dark: "", font: "", caps: "" },
+          val: { size: "10", color: "", dark: "", font: "", caps: "" },
           name: "Reminder title",
           type: "fonts",
         },
@@ -2123,7 +2123,7 @@ const weatherCal = {
           type: "fonts",
         },
         newsTitle:  {
-          val: { size: "6", color: "", dark: "", font: "", caps: "" },
+          val: { size: "8", color: "", dark: "", font: "", caps: "" },
           name: "News item title",
           type: "fonts",
         },
@@ -2133,32 +2133,32 @@ const weatherCal = {
           type: "fonts",
         },
         largeTemp:   {
-          val: { size: "10", color: "", dark: "", font: "light", caps: "" },
+          val: { size: "15", color: "", dark: "", font: "light", caps: "" },
           name: "Large temperature label",
           type: "fonts",
         },
         smallTemp:   {
-          val: { size: "6", color: "", dark: "", font: "", caps: "" },
+          val: { size: "12", color: "", dark: "", font: "", caps: "" },
           name: "Most text used in weather items",
           type: "fonts",
         },
         tinyTemp:    {
-          val: { size: "6", color: "", dark: "", font: "", caps: "" },
+          val: { size: "8", color: "", dark: "", font: "", caps: "" },
           name: "Small text used in weather items",
           type: "fonts",
         },
         customText:  {
-          val: { size: "8", color: "", dark: "", font: "", caps: "" },
+          val: { size: "15", color: "", dark: "", font: "", caps: "" },
           name: "User-defined text items",
           type: "fonts",
         },
         battery:     {
-          val: { size: "6", color: "", dark: "", font: "medium", caps: "" },
+          val: { size: "8", color: "", dark: "", font: "medium", caps: "" },
           name: "Battery percentage",
           type: "fonts",
         },
         sunrise:     {
-          val: { size: "8", color: "", dark: "", font: "medium", caps: "" },
+          val: { size: "10", color: "", dark: "", font: "medium", caps: "" },
           name: "Sunrise and sunset",
           type: "fonts",
         },
