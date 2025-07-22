@@ -67,11 +67,12 @@ async function getGeminiLayout(weatherCal) {
     })),
     // FIX: Convert reminder dates to local time strings (if they exist)
     reminders: weatherCal.data.reminders.map(r => ({ 
-      title: r.title, 
-      dueDate: r.dueDate ? r.dueDate.toString() : null, 
+      title: r.title,
+      dueDate: r.dueDate ? r.dueDate.toString() : null,
       isOverdue: r.isOverdue 
-    })),    battery: {
-        level: Device.batteryLevel(),
+    })),
+    battery: {
+        level: Math.round(Device.batteryLevel() * 100) + "%",
         isCharging: Device.isCharging()
     },
     news_headlines: weatherCal.data.news,
