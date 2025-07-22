@@ -69,7 +69,7 @@ async function getGeminiLayout(weatherCal) {
 
     Analyze the provided JSON context, which includes the current time, location, weather, sunrise/sunset times, calendar events, reminders, battery status, and more.
 
-    Choose up to 4 of the most relevant widget items from the list below. The items should be ordered by importance, as the first item will be given more space in the layout.
+    Choose up to 4 of the most relevant widget items from the list below. The items should be ordered by importance.
 
     Your response must be ONLY the raw JSON object, without any surrounding text, explanations, or markdown formatting like \`\`\`.
 
@@ -88,15 +88,15 @@ async function getGeminiLayout(weatherCal) {
     - 'news': The latest news headline from a pre-configured RSS feed.
 
     ## Output Format:
-    {"layout": "item1\\nitem2\\nitem3", "message": "A concise, and relevant one-liner for the user."}
+    {"layout": "item1\\nitem2\\nitem3", "message": "A concise, and relevant one-liner less than 10 words."}
 
     ## Example:
     It's morning, there's an event soon, and it's raining.
-    {"layout": "events\\ncurrent\\nnews", "message": "You have an event soon. Don't forget your umbrella!"}
+    {"layout": "events\\ncurrent\\nnews\\nhourly", "message": "Event soon. Don't forget your umbrella!"}
   `;
 
   const inputData = {
-    query: "Choose the best widget layout and create a one-line message based on the context.",
+    query: "Choose the best widget layout and create a short message based on the context.",
     context: JSON.stringify(context, null, 2),
     systemPrompt: systemPrompt,
   };
@@ -123,7 +123,7 @@ async function getGeminiLayout(weatherCal) {
   } catch (e) {
     console.error("Gemini API/JSON Parse error: " + e.message);
     return {
-      layout: "greeting\ndate\ncurrent",
+      layout: "date\ncurrent\nhourly",
       message: "Here is your daily summary.",
     };
   }
@@ -175,16 +175,21 @@ const safeMessage = geminiData.message.replace(/"/g, '\\"');
 // 2. Split the layout items into an array
 const items = geminiData.layout.split('\n').filter(item => item.trim() !== '' && code[item.trim()]);
 
-// 3. Distribute items into left and right columns
+// 3. Distribute items into three columns
 const leftItems = [];
+const middleItems = [];
 const rightItems = [];
 
-if (items.length > 0) {
-  // The first, most important item goes to the left column.
-  leftItems.push(items.shift()); 
-}
-// The rest of the items go to the right column.
-items.forEach(item => rightItems.push(item));
+items.forEach((item, index) => {
+  const mod = index % 3;
+  if (mod === 0) {
+    leftItems.push(item);
+  } else if (mod === 1) {
+    middleItems.push(item);
+  } else {
+    rightItems.push(item);
+  }
+});
 
 // 4. Build the layout strings for each column
 const leftColumnString = leftItems.length > 0 ? `
@@ -192,22 +197,26 @@ const leftColumnString = leftItems.length > 0 ? `
       ${leftItems.join('\n      ')}
 ` : '';
 
+const middleColumnString = middleItems.length > 0 ? `
+    column
+      ${middleItems.join('\n      ')}
+` : '';
+
 const rightColumnString = rightItems.length > 0 ? `
     column
       ${rightItems.join('\n      ')}
 ` : '';
 
-// 5. Assemble the final layout with the message on top
+// 5. Assemble the final layout with the message on top and three content columns
 const layout = `
-  // Top row for the centered greeting message
   row
     column
       center
-      text("${safeMessage}")
+      text(${safeMessage})
 
-  // Bottom row for the two-column content
   row
     ${leftColumnString}
+    ${middleColumnString}
     ${rightColumnString}
 `;
 
