@@ -609,8 +609,8 @@ const weatherCal = {
     }
 
     // Construct the widget.
-    this.currentRow = {}
-    this.currentColumn = {}
+    this.currentRow = this.widget
+    this.currentColumn = this.widget
     this.left()
 
     this.usingASCII = undefined
@@ -698,7 +698,7 @@ const weatherCal = {
     this.currentRow = this.widget.addStack()
     this.currentRow.layoutHorizontally()
     this.currentRow.setPadding(0, 0, 0, 0)
-    // this.currentColumn.spacing = 0
+    this.currentColumn.spacing = 0
     if (parameter) this.currentRow.size = new Size(0,parseInt(parameter))
   },
 
