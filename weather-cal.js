@@ -44,28 +44,59 @@ async function getGeminiLayout(weatherCal) {
     weatherCal.locale = Device.locale();
   }
 
-  // Gather context for Gemini
-  await weatherCal.setupWeather();
+  // --- Gather rich context for Gemini ---
+  await weatherCal.setupWeather(); // Includes location and sun data
   await weatherCal.setupEvents();
   await weatherCal.setupReminders();
+  await weatherCal.setupNews();
 
   const context = {
-    date: new Date().toString(),
+    current_time: new Date().toString(),
+    location: weatherCal.data.location,
     weather: weatherCal.data.weather,
-    events: weatherCal.data.events.map(e => ({ title: e.title, startDate: e.startDate })),
-    reminders: weatherCal.data.reminders.map(r => ({ title: r.title, dueDate: r.dueDate })),
+    sun_times: weatherCal.data.sun,
+    events: weatherCal.data.events.map(e => ({ title: e.title, startDate: e.startDate, isAllDay: e.isAllDay })),
+    reminders: weatherCal.data.reminders.map(r => ({ title: r.title, dueDate: r.dueDate, isOverdue: r.isOverdue })),
+    battery: {
+        level: Device.batteryLevel(),
+        isCharging: Device.isCharging()
+    },
+    news_headlines: weatherCal.data.news,
   };
 
   const systemPrompt = `
-    You are an intelligent assistant for a mobile widget. 
-    Based on the user's context (date, weather, events), choose up to 3 relevant widget items, **ordered by importance**, and provide a concise, friendly message.
-    Available items: 'date', 'greeting', 'events', 'reminders', 'current', 'future', 'forecast', 'sunrise', 'battery'.
+    You are an intelligent assistant for a mobile widget. Your goal is to create the most useful and relevant widget layout for the user based on their current context.
+
+    Analyze the provided JSON context, which includes the current time, location, weather, sunrise/sunset times, calendar events, reminders, battery status, and more.
+
+    Choose up to 4 of the most relevant widget items from the list below. The items should be ordered by importance, as the first item will be given more space in the layout.
+
     Your response must be ONLY the raw JSON object, without any surrounding text, explanations, or markdown formatting like \`\`\`.
-    Example: {"layout": "events\\ngreeting\\ncurrent", "message": "Here's your afternoon update!"}
+
+    ## Available Widget Items:
+    - 'date': The current date. Shows a large date, but becomes smaller if events are also shown.
+    - 'events': A list of upcoming calendar events. A top priority if there are events soon.
+    - 'reminders': A list of incomplete reminders. Important if items are overdue or due soon.
+    - 'current': The current weather conditions and temperature.
+    - 'future': A summary of the weather for the next hour (day) or tomorrow (night).
+    - 'hourly': A multi-hour weather forecast. Good for planning an outing.
+    - 'daily': A multi-day weather forecast. Good for planning ahead.
+    - 'sunrise': The next sunrise or sunset time. Most relevant near those times.
+    - 'battery': The current battery level and charging status. Most relevant when the battery is low.
+    - 'uvi': The current UV Index. Important on sunny days.
+    - 'week': The current week number of the year.
+    - 'news': The latest news headline from a pre-configured RSS feed.
+
+    ## Output Format:
+    {"layout": "item1\\nitem2\\nitem3", "message": "A concise, and relevant one-liner for the user."}
+
+    ## Example:
+    It's morning, there's an event soon, and it's raining.
+    {"layout": "events\\ncurrent\\nnews", "message": "You have an event soon. Don't forget your umbrella!"}
   `;
 
   const inputData = {
-    query: "Choose the best widget layout based on the context.",
+    query: "Choose the best widget layout and create a one-line message based on the context.",
     context: JSON.stringify(context, null, 2),
     systemPrompt: systemPrompt,
   };
@@ -142,7 +173,7 @@ const geminiData = await getGeminiLayout(code);
 const safeMessage = geminiData.message.replace(/"/g, '\\"');
 
 // 2. Split the layout items into an array
-const items = geminiData.layout.split('\n').filter(item => item.trim() !== '');
+const items = geminiData.layout.split('\n').filter(item => item.trim() !== '' && code[item.trim()]);
 
 // 3. Distribute items into left and right columns
 const leftItems = [];
@@ -173,9 +204,6 @@ const layout = `
     column
       center
       text("${safeMessage}")
-
-  // Optional space between greeting and content
-  space(10)
 
   // Bottom row for the two-column content
   row
