@@ -55,7 +55,10 @@ async function getGeminiLayout(weatherCal) {
     current_time: new Date().toString(),
     location: weatherCal.data.location,
     weather: weatherCal.data.weather,
-    sun_times: weatherCal.data.sun,
+    sun_times: {
+      sunrise: weatherCal.data.sunrise ? weatherCal.data.sunrise.toString() : null,
+      sunset: weatherCal.data.sunset ? weatherCal.data.sunset.toString() : null,
+    },
     // FIX: Convert event dates to local time strings
     events: weatherCal.data.events.map(e => ({ 
       title: e.title, 
