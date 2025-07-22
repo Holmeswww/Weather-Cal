@@ -951,6 +951,12 @@ const weatherCal = {
     this.data.weather.todayLow = weatherData ? weatherData.daily[0].temp.min : null
     this.data.weather.uvi = weatherData ? weatherData.current.uvi : null
 
+    // --- Sun data ---
+    this.data.sun = {}
+    this.data.sun.sunrise = weatherData ? weatherData.daily[0].sunrise*1000 : null
+    this.data.sun.sunset = weatherData ? weatherData.daily[0].sunset*1000 : null
+    this.data.sun.tomorrow = weatherData ? weatherData.daily[1].sunrise*1000 : null
+
     this.data.weather.forecast = []
     this.data.weather.hourly = []
     for (let i=0; i <= 7; i++) {

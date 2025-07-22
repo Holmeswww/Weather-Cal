@@ -46,7 +46,6 @@ async function getGeminiLayout(weatherCal) {
 
   // --- Gather rich context for Gemini ---
   await weatherCal.setupWeather(); // Includes location and sun data
-  await weatherCal.setupSunrise();
   await weatherCal.setupEvents();
   await weatherCal.setupReminders();
   await weatherCal.setupNews();
