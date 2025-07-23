@@ -940,9 +940,6 @@ const weatherCal = {
       } catch {}
     }
 
-    console.log("--- Full OpenWeather API Response ---");
-    console.log(JSON.stringify(weatherData, null, 2));
-
     // English continues using the "main" weather description.
     const english = (locale.split("_")[0] == "en")
 
