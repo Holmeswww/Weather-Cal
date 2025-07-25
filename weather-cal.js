@@ -104,8 +104,8 @@ async function getGeminiLayout(weatherCal) {
     {"layout": "item1\\nitem2\\nitem3", "message": "A concise, and relevant one-liner less than 10 words."}
 
     ## Example:
-    It's morning, there's an event soon, and it's raining.
-    {"layout": "events\\ncurrent\\nnews\\nhourly", "message": "Event soon. Don't forget your umbrella!"}
+    It's morning, there's an event (tennis) soon, and it's raining.
+    {"layout": "events\\ncurrent\\nnews\\nhourly", "message": "Tennis soon. Don't forget your umbrella!"}
   `;
 
   const inputData = {
